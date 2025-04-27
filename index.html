@@ -1,59 +1,72 @@
 <html>
-
-<head>
+  <head>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script
-        src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
-</head>
+    <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
 
-<body>
-    <a-scene webxr="optionalFeatures: hand-tracking" physics="gravity: -9.8" embedded>
+    <!-- Thumbstick movement script -->
+    <script>
+      AFRAME.registerComponent('thumbstick-movement', {
+        schema: {speed: {default: 0.1}},
+        init: function () {
+          this.direction = new THREE.Vector3();
+        },
+        tick: function () {
+          const leftHand = document.querySelector('#leftHand');
+          const rightHand = document.querySelector('#rightHand');
+          let gamepad;
+          if (leftHand && leftHand.components['tracked-controls']?.controller) {
+            gamepad = leftHand.components['tracked-controls'].controller;
+          } else if (rightHand && rightHand.components['tracked-controls']?.controller) {
+            gamepad = rightHand.components['tracked-controls'].controller;
+          }
+          if (gamepad && gamepad.axes.length >= 2) {
+            let x = gamepad.axes[2] || 0;
+            let y = gamepad.axes[3] || 0;
+            this.el.object3D.position.x -= x * this.data.speed;
+            this.el.object3D.position.z -= y * this.data.speed;
+          }
+        }
+      });
+    </script>
+  </head>
 
-        <!-- CAMERA + RIG (movement and COLLISIONS enabled) -->
-        <a-entity id="rig" position="0 1.6 5" movement-controls kinematic-body>
-            <a-entity camera wasd-controls look-controls></a-entity>
+  <body>
+    <a-scene 
+      webxr="optionalFeatures: hand-tracking"
+      physics="gravity: -9.8"
+      embedded>
 
-            <!-- Hands (hand-tracking or controller fallback) -->
-            <a-entity id="leftHand" hand-tracking-controls="hand: left" oculus-touch-controls="hand: left"
-                vive-controls="hand: left" windows-motion-controls="hand: left">
-            </a-entity>
-            <a-entity id="rightHand" hand-tracking-controls="hand: right" oculus-touch-controls="hand: right"
-                vive-controls="hand: right" windows-motion-controls="hand: right">
-            </a-entity>
+      <!-- Camera + Rig (Movement + Collisions + Thumbstick Movement) -->
+      <a-entity id="rig" position="0 1.6 5" movement-controls kinematic-body thumbstick-movement="speed: 0.1">
+        <a-entity camera wasd-controls look-controls></a-entity>
+
+        <!-- Hands -->
+        <a-entity id="leftHand" hand-tracking-controls="hand: left"
+          oculus-touch-controls="hand: left" vive-controls="hand: left" windows-motion-controls="hand: left">
         </a-entity>
+        <a-entity id="rightHand" hand-tracking-controls="hand: right"
+          oculus-touch-controls="hand: right" vive-controls="hand: right" windows-motion-controls="hand: right">
+        </a-entity>
+      </a-entity>
 
-        <!-- Ground -->
-        <a-plane static-body color="#c2b280" rotation="-90 0 0" width="30" height="30"></a-plane>
+      <!-- Ground -->
+      <a-plane static-body color="#c2b280" rotation="-90 0 0" width="30" height="30"></a-plane>
 
-        <!-- Whiteboard -->
-        <a-box static-body position="0 2 -10" width="8" height="4" depth="0.1" color="#FFFFFF"></a-box>
-        <a-text value="&lt;a-scene&gt; \n &lt;a-box&gt; \n &lt;/a-scene&gt;" position="0 3.2 -9.9" align="center"
-            width="6" color="#000000" wrap-count="30" line-height="40">
-        </a-text>
+      <!-- Walls and Classroom Setup (Same as before) -->
+      <a-box static-body position="0 2 -15" width="30" height="5" depth="0.5" color="#ddeeff"></a-box>
+      <a-box static-body position="-15 2 0" width="0.5" height="5" depth="30" color="#ddeeff"></a-box>
+      <a-box static-body position="15 2 0" width="0.5" height="5" depth="30" color="#ddeeff"></a-box>
+      <a-box static-body position="0 5 0" width="30" height="0.5" depth="30" color="#dddddd"></a-box>
 
-        <!-- Walls -->
-        <a-box static-body position="0 2 -15" width="30" height="5" depth="0.5" color="#ddeeff"></a-box>
-        <a-box static-body position="-15 2 0" width="0.5" height="5" depth="30" color="#ddeeff"></a-box>
-        <a-box static-body position="15 2 0" width="0.5" height="5" depth="30" color="#ddeeff"></a-box>
-        <a-box static-body position="0 5 0" width="30" height="0.5" depth="30" color="#dddddd"></a-box>
+      <!-- Desks and Chairs -->
+      <a-box static-body position="-4 1 -4" width="2" height="1" depth="1" color="#8B4513"></a-box>
+      <a-box static-body position="0 1 -4" width="2" height="1" depth="1" color="#8B4513"></a-box>
+      <a-box static-body position="4 1 -4" width="2" height="1" depth="1" color="#8B4513"></a-box>
 
-        <!-- Desks (with static collision) -->
-        <a-box static-body position="-4 1 -4" width="2" height="1" depth="1" color="#8B4513"></a-box>
-        <a-box static-body position="0 1 -4" width="2" height="1" depth="1" color="#8B4513"></a-box>
-        <a-box static-body position="4 1 -4" width="2" height="1" depth="1" color="#8B4513"></a-box>
+      <a-sphere dynamic-body position="0 2 -5" radius="0.3" color="red"></a-sphere>
 
-        <!-- Chairs -->
-        <a-box static-body position="-4 0.5 -5" width="1" height="1" depth="1" color="#654321"></a-box>
-        <a-box static-body position="0 0.5 -5" width="1" height="1" depth="1" color="#654321"></a-box>
-        <a-box static-body position="4 0.5 -5" width="1" height="1" depth="1" color="#654321"></a-box>
-
-        <!-- Interactive ball -->
-        <a-sphere dynamic-body position="0 2 -5" radius="0.3" color="red"></a-sphere>
-
-        <!-- Sky -->
-        <a-sky color="#ECECEC"></a-sky>
+      <a-sky color="#ECECEC"></a-sky>
 
     </a-scene>
-</body>
-
+  </body>
 </html>
