@@ -1,12 +1,15 @@
-<!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <meta charset="utf-8">
     <title>A-Frame Hand-Tracking VR Interactive Demo</title>
+
     <!-- A-Frame core -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <!-- Environment for sky/ground -->
-    <script src="https://unpkg.com/aframe-environment-component@1.5.x/dist/aframe-environment-component.min.js"></script>
+    <!-- Environment (background, ground) -->
+    <script
+        src="https://unpkg.com/aframe-environment-component@1.5.x/dist/aframe-environment-component.min.js"></script>
+
     <!-- Your custom interaction components -->
     <script src="pinchable.js"></script>
     <script src="pressable.js"></script>
@@ -16,78 +19,63 @@
     <script src="button.js"></script>
     <script src="menu.js"></script>
     <script src="event-manager.js"></script>
-  </head>
-  <body>
-    <a-scene
-      environment="preset: forest; skyType: color; skyColor: #ECECEC"
-      info-message="htmlSrc: #messageText"
-      vr-mode-ui="enabled: true"
-    >
-      <a-assets>
-        <a-asset-item id="messageText" src="message.html"></a-asset-item>
-      </a-assets>
+</head>
 
-      <!-- Interactive shapes (only one visible at a time) -->
-      <a-entity id="interactiveScene">
-        <!-- Box: pinchable & resizeable -->
-        <a-entity
-          id="boxGeometry"
-          class="interactive"
-          geometry="primitive: box; depth:0.5; height:0.5; width:0.5"
-          material="color: #FF4B5C"
-          position="-0.5 1 -1"
-          pinchable
-          size-change
-        ></a-entity>
+<body>
+    <a-scene environment="preset: forest; skyType: color; skyColor: #ECECEC" webxr="optionalFeatures: hand-tracking"
+        vr-mode-ui="enabled: true">
 
-        <!-- Sphere: pressable to change color, resizeable -->
-        <a-entity
-          id="sphereGeometry"
-          class="interactive"
-          geometry="primitive: sphere; radius:0.3"
-          material="color: #D2E603"
-          position="0 1 -1"
-          visible="false"
-          pressable
-          color-change
-          size-change
-        ></a-entity>
+        <a-assets>
+            <a-asset-item id="messageText" src="message.html"></a-asset-item>
+        </a-assets>
 
-        <!-- Torus: pinchable to move, resizeable -->
-        <a-entity
-          id="torusGeometry"
-          class="interactive"
-          geometry="primitive: torus; radius:0.25; radiusTubular:0.05"
-          material="color: #7BC8A4"
-          position="0.5 1 -1"
-          visible="false"
-          pinchable
-          size-change
-        ></a-entity>
-      </a-entity>
+        <!-- MOVEMENT RIG (fix for WASD and VR) -->
+        <a-entity id="rig" position="0 1.6 0" movement-controls>
+            <!-- CAMERA -->
+            <a-entity id="camera" camera wasd-controls look-controls></a-entity>
 
-      <!-- Floating menu: shape selectors, size slider, dark mode toggle -->
-      <a-entity id="menu" menu position="0 1.5 -0.5" event-manager>
-        <!-- size slider -->
-        <a-entity slider position="0 0.1 0"></a-entity>
-        <!-- shape buttons -->
-        <a-entity id="sphereButton" button="label: sphere" position="-0.2 0 0"></a-entity>
-        <a-entity id="boxButton"    button="label: box"    position="0    0 0"></a-entity>
-        <a-entity id="torusButton"  button="label: torus"  position="0.2  0 0"></a-entity>
-        <!-- dark mode toggle -->
-        <a-entity
-          id="darkModeButton"
-          button="label: Dark Mode; toggleable: true"
-          position="0 -0.1 0"
-        ></a-entity>
-      </a-entity>
+            <!-- HAND CONTROLLERS -->
+            <a-entity id="leftHand" hand-tracking-controls="hand: left" oculus-touch-controls="hand: left"
+                vive-controls="hand: left" windows-motion-controls="hand: left">
+            </a-entity>
 
-      <!-- Hand-tracking inputs -->
-      <a-entity hand-tracking-controls="hand: left"></a-entity>
-      <a-entity hand-tracking-controls="hand: right"></a-entity>
+            <a-entity id="rightHand" hand-tracking-controls="hand: right" oculus-touch-controls="hand: right"
+                vive-controls="hand: right" windows-motion-controls="hand: right">
+            </a-entity>
+        </a-entity>
 
-      <!-- VR camera -->
-      <a-entity camera look-controls position="0 1.6 0"></a-entity>
+        <!-- Interactive Scene -->
+        <a-entity id="interactiveScene">
+            <!-- Box -->
+            <a-entity id="boxGeometry" class="interactive" geometry="primitive: box; depth:0.5; height:0.5; width:0.5"
+                material="color: #FF4B5C" position="-0.5 1 -1" pinchable size-change>
+            </a-entity>
+
+            <!-- Sphere -->
+            <a-entity id="sphereGeometry" class="interactive" geometry="primitive: sphere; radius:0.3"
+                material="color: #D2E603" position="0 1 -1" visible="false" pressable color-change size-change>
+            </a-entity>
+
+            <!-- Torus -->
+            <a-entity id="torusGeometry" class="interactive"
+                geometry="primitive: torus; radius:0.25; radiusTubular:0.05" material="color: #7BC8A4"
+                position="0.5 1 -1" visible="false" pinchable size-change>
+            </a-entity>
+        </a-entity>
+
+        <!-- Menu -->
+        <a-entity id="menu" menu position="0 1.5 -0.5" event-manager>
+            <a-entity slider position="0 0.1 0"></a-entity>
+            <a-entity id="sphereButton" button="label: sphere" position="-0.2 0 0"></a-entity>
+            <a-entity id="boxButton" button="label: box" position="0 0 0"></a-entity>
+            <a-entity id="torusButton" button="label: torus" position="0.2 0 0"></a-entity>
+            <a-entity id="darkModeButton" button="label: Dark Mode; toggleable: true" position="0 -0.1 0"></a-entity>
+        </a-entity>
+
+        <!-- Sky -->
+        <a-sky color="#ECECEC"></a-sky>
+
     </a-scene>
-  </body>
+</body>
+
 </html>
